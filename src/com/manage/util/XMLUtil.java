@@ -16,7 +16,8 @@ public class XMLUtil {
 	 */
 	public static HashMap<String, String> getBean() {
 		try {
-			String path = "D:\\soft_application\\eclipse\\program_codes\\Agile\\WebContent\\WEB-INF\\mysqlConfig.xml";
+			String path = "D:\\soft_application\\eclipse\\program_codes\\AgileManage\\WebContent\\WEB-INF\\mysqlConfig.xml";
+			//"D:\\soft_application\\eclipse\\program_codes\\AgileManage\\WebContent\\WEB-INF"
 			DocumentBuilder dBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
 			Document document = dBuilder.parse(new File(path));
 
