@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config>
+	<ip>222.22.65.134</ip>
+	<port>16306</port>
+	<database>agile</database>
+	<user>agile</user>
+	<password>agile</password>
+</config> 
+<!-- <config>
+	<ip>192.168.43.28</ip>
+	<port>3306</port>
+	<database>agile</database>
+	<user>agile</user>
+	<password>agile</password>
+</config> -->
