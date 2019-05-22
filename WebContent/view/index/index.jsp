@@ -62,8 +62,10 @@
             <li class="layui-nav-item">
 				<a href="javascript:;">餐厅公告管理</a>
 				<dl class="layui-nav-child">
-					<dd><a href="javascript:;">添加新公告</a></dd>
-					<dd><a href="javascript:;">显示餐厅公告</a></dd>
+					<dd><a href="/DevelopManage-master/ChangeNotesServlet?type=selectA" target="option1">修改餐厅简介</a></dd>
+					<dd><a href="/DevelopManage-master/ChangeNotesServlet?type=selectB" target="option1">修改餐厅招聘</a></dd>
+					<dd><a href="/DevelopManage-master/ChangeNotesServlet?type=selectC" target="option1">修改餐厅加盟</a></dd>
+					<dd><a href="/DevelopManage-master/ChangeNotesServlet?type=selectD" target="option1">修改餐厅公告</a></dd>
 				</dl>
 			</li>
 			<li class="layui-nav-item">
