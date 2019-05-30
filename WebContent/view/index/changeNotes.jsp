@@ -8,11 +8,11 @@
 	content="width=device-width, initial-scale=1, maximum-scale=1">
 <jsp:useBean id="au" class="com.manage.bean.TB_AboutUs" scope="request"></jsp:useBean>
 <title></title>
-<link rel="stylesheet" href="layui/css/layui.css">
+<link rel="stylesheet" href="view/index/layui/css/layui.css">
 </head>
 <body class="layui-layout-body">
 
-	<script src="layui/layui.js"></script>
+	<script src="view/index/layui/layui.js"></script>
 	<script>
 		layui.use('element', function() {
 			var element = layui.element;

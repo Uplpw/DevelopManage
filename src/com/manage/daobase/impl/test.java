@@ -11,7 +11,7 @@ import com.manage.bean.TB_User;
  */
 public class test {
 	public static void main(String[] args) {
-		TB_User t=new UserInfoDao().get(60);
+		/*TB_User t=new UserInfoDao().get(60);
 		System.out.println(t.getPassword());
 		System.out.println(t.getUsername());
 		
@@ -19,6 +19,6 @@ public class test {
 		yy.setUsername("2016111");
 		yy.setPassword("0");
 		
-		new UserInfoDao().save(yy);
+		new UserInfoDao().save(yy);*/
 	}
 }

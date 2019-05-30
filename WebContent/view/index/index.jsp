@@ -71,10 +71,9 @@
 			<li class="layui-nav-item">
 				<a href="javascript:;">系统用户管理</a>
 				<dl class="layui-nav-child">
-					<dd><a href="javascript:;">查询用户</a></dd>
-					<dd><a href="javascript:;">添加新用户</a></dd>
-					<dd><a href="javascript:;">删除用户</a></dd>
-				</dl>
+                    <dd><a href="userManage/staffManage.jsp" target="option1">员工管理</a></dd>
+                    <dd><a href="userManage/customerManage.jsp" target="option1">顾客管理</a></dd>
+                </dl>
 			</li>
           </ul>
         </div>

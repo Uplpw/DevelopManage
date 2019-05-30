@@ -2,6 +2,7 @@ package com.manage.daobase;
 
 import java.io.Serializable;
 import java.lang.reflect.Field;
+import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -40,47 +41,49 @@ public class BaseDao<T, PK extends Serializable> implements IBaseDao<T, PK> {
 		if (!isAsc)
 			asc = "desc";
 		String sql = "select * from " + entityClass.getSimpleName() + " order by " + orderBy + " " + asc;
-		//System.out.println(sql);
+		// System.out.println(sql);
 		return getAll(sql);
 	}
 
 	@Override
 	public List<T> findBy(String propertyName, Object value, String orderBy, boolean isAsc) {
 		String asc = "asc";
-		if (isAsc)
+		if (!isAsc)
 			asc = "desc";
-		
+
 		String sql = "select * from " + entityClass.getSimpleName() + " where " + propertyName;
-		
-		if(value instanceof String) {
+
+		if (value instanceof String) {
 			sql = sql + " = '" + value + "' order by " + orderBy + " " + asc;
-		}else if(value instanceof Integer){
+		} else if (value instanceof Integer) {
 			sql = sql + " = " + value + " order by " + orderBy + " " + asc;
-		}else {
+		} else {
 			System.out.println("类型转换尚未完成。");
 		}
 		System.out.println(sql);
 		return getAll(sql);
 	}
-	
+
 	/*
 	 * 模糊查询(non-Javadoc)
-	 * @see com.it.Agile.daoBase.IBaseDao#findLike(java.lang.String, java.lang.Object, java.lang.String, boolean)
+	 * 
+	 * @see com.it.Agile.daoBase.IBaseDao#findLike(java.lang.String,
+	 * java.lang.Object, java.lang.String, boolean)
 	 */
 	@Override
 	public List<T> findLike(String propertyName, Object value, String orderBy, boolean isAsc) {
 		// TODO Auto-generated method stub
 		String asc = "asc";
-		if (isAsc) {
+		if (!isAsc) {
 			asc = "desc";
 		}
-		String sql = "select * from " + entityClass.getSimpleName() + " where " + propertyName + " like " +
-				"'%"+ value +"%'" + " order by " + orderBy + " " + asc;
+		String sql = "select * from " + entityClass.getSimpleName() + " where " + propertyName + " like " + "'%" + value
+				+ "%'" + " order by " + orderBy + " " + asc;
 		System.out.println(sql);
 		return getAll(sql);
-		//return null;
+		// return null;
 	}
-	
+
 	@Override
 	/**
 	 * 
@@ -94,10 +97,19 @@ public class BaseDao<T, PK extends Serializable> implements IBaseDao<T, PK> {
 		try {
 			String keys = "";
 			String values = "";
+			boolean flag = false;
 			for (int i = 0; i < fields.length; i++) {
 				fields[i].setAccessible(true);
-				keys += fields[i].getName();
-				switch (fields[i].get(entity).getClass().getSimpleName()) {
+				if (fields[i].get(entity) == null)
+					continue;
+				if (flag) {
+					keys += " ," + fields[i].getName();
+					values += " ,";
+				} else {
+					keys += fields[i].getName();
+					flag = !flag;
+				}
+				switch (fields[i].getType().getSimpleName()) {
 				case "String":
 					values += " '" + fields[i].get(entity) + "' ";
 					break;
@@ -113,10 +125,6 @@ public class BaseDao<T, PK extends Serializable> implements IBaseDao<T, PK> {
 				default:
 					System.out.println("类型转换尚未完成");
 					break;
-				}
-				if (i != fields.length - 1) {
-					keys += ",";
-					values += ",";
 				}
 			}
 			sql += " ( " + keys + " ) " + "values ( " + values + " ) ";
@@ -138,19 +146,72 @@ public class BaseDao<T, PK extends Serializable> implements IBaseDao<T, PK> {
 
 	@Override
 	public void update(T entity) {
-		/*Connection connection = null;
-		PreparedStatement preparedStatement = null;
-		ResultSet resultSet = null;
-		Field[] fields = entity.getClass().getDeclaredFields();
-		String sql = "update " + entity.getClass().getSimpleName();
-		sql+=" set status = "+entity.*/
+		/*
+		 * Connection connection = null; PreparedStatement preparedStatement =
+		 * null; ResultSet resultSet = null; Field[] fields =
+		 * entity.getClass().getDeclaredFields(); String sql = "update " +
+		 * entity.getClass().getSimpleName(); sql+=" set status = "+entity.
+		 */
 
 	}
 
+	// 无回滚，有bug
 	@Override
-	public void remove(T entity) {
+	public int remove(T entity) {
 		// TODO Auto-generated method stub
+		Connection connection = null;
+		PreparedStatement preparedStatement = null;
+		int rst = 0;
+		String sql = "delete from " + entityClass.getSimpleName() + " where ";
+		ArrayList<String> keys = new ArrayList<>();
+		ArrayList<String> values = new ArrayList<>();
+		Field[] fields = entityClass.getDeclaredFields();
+		try {
+			for (Field field : fields) {
 
+				field.setAccessible(true);
+				if (field.get(entity) == null)
+					continue;
+				keys.add(field.getName());
+				switch (field.getType().getSimpleName()) {
+				case "String":
+					values.add(" '" + field.get(entity) + "' ");
+					break;
+				case "Integer":
+					values.add(" " + field.get(entity) + " ");
+					break;
+				case "BigDecimal":
+					values.add(" " + field.get(entity) + " ");
+					break;
+				case "Long":
+					values.add(" " + field.get(entity) + " ");
+					break;
+				default:
+					System.out.println("类型转换尚未完成");
+					break;
+				}
+			}
+
+			for (int i = 0; i < keys.size() - 1; i++) {
+				sql += keys.get(i) + " = " + values.get(i) + " and ";
+			}
+			sql += keys.get(keys.size() - 1) + " = " + values.get(keys.size() - 1);
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
+
+		try {
+			System.out.println(sql);
+			connection = DBUtil.getConnection();
+			preparedStatement = connection.prepareStatement(sql);
+			rst = preparedStatement.executeUpdate();
+			return rst;
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			DBUtil.closeJDBC(null, preparedStatement, connection);
+		}
+		return rst;
 	}
 
 	@Override
@@ -178,14 +239,15 @@ public class BaseDao<T, PK extends Serializable> implements IBaseDao<T, PK> {
 	}
 
 	private List<T> getAll(String sql) {
+		System.out.println(sql);
 		Connection connection = null;
 		PreparedStatement preparedStatement = null;
 		ResultSet resultSet = null;
 		ArrayList<Object> aList = null;
 		try {
-			//System.out.println(1);
+			// System.out.println(1);
 			connection = DBUtil.getConnection();
-			//System.out.println(2);
+			// System.out.println(2);
 			preparedStatement = connection.prepareStatement(sql);
 			resultSet = preparedStatement.executeQuery();
 			aList = new ArrayList<>();
@@ -206,19 +268,65 @@ public class BaseDao<T, PK extends Serializable> implements IBaseDao<T, PK> {
 		return (List<T>) aList;
 	}
 
-	/* (non-Javadoc)
-	 * @see com.it.Agile.daoBase.IBaseDao#findBetweenProperty(java.lang.String, java.lang.Object, java.lang.Object, java.lang.String, boolean)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.it.Agile.daoBase.IBaseDao#findBetweenProperty(java.lang.String,
+	 * java.lang.Object, java.lang.Object, java.lang.String, boolean)
 	 */
 	@Override
 	public List<T> findBetweenProperty(String propertyName, Object valueOne, Object valueTwo, String orderBy,
 			boolean isAsc) {
 		String asc = "asc";
-		if (isAsc)
+		if (!isAsc)
 			asc = "desc";
-		
-		String sql = "select * from " + entityClass.getSimpleName() + " where " + propertyName +
-				" >= " + valueOne + " and " + propertyName +" < "+ valueTwo+ " order by " + orderBy + " " + asc;
-		System.out.println(sql);
+
+		String sql = "select * from " + entityClass.getSimpleName() + " where " + propertyName + " >= " + valueOne
+				+ " and " + propertyName + " < " + valueTwo + " order by " + orderBy + " " + asc;
+		return getAll(sql);
+	}
+
+	public List<T> findNotProperty(String propertyName, Object value, String orderBy, boolean isAsc) {
+		String asc = "asc";
+		if (!isAsc) {
+			asc = "desc";
+		}
+		String sql = "select * from " + entityClass.getSimpleName();
+		if (value instanceof String)
+			value = " '" + value + "' ";
+		else if (value instanceof Integer) {
+			value = "" + value + "";
+		} else if (value instanceof BigDecimal) {
+			value = "" + value + "";
+		} else if (value instanceof Long) {
+			value = "" + value + "";
+		}
+		sql += " where " + propertyName + " != " + value + " order by " + orderBy + " " + asc;
+		return getAll(sql);
+	}
+
+	public List<T> findLimitProperty(String propertyName, Object value, String orderBy, boolean isAsc, int start,
+			int num) {// [start,start + num)
+		String asc = "asc";
+		if (isAsc) {
+			asc = "desc";
+		}
+		String sql = "select * from " + entityClass.getSimpleName();
+		if (value instanceof String)
+			value = " '" + value + "' ";
+		else if (value instanceof Integer) {
+			value = "" + value + "";
+		} else if (value instanceof BigDecimal) {
+			value = "" + value + "";
+		} else if (value instanceof Long) {
+			value = "" + value + "";
+		}
+		sql += " where " + propertyName + "=" + value + " order by " + orderBy + " " + asc + " limit " + start + " , "
+				+ num;
+		return getAll(sql);
+	}
+
+	protected List<T> getAllProtected(String sql) {
 		return getAll(sql);
 	}
 }
